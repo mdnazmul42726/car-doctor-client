@@ -1,12 +1,15 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import img from '../../assets/images/login/login.svg'
 import { useContext } from 'react';
 import { AuthContext } from '../AuthProvider';
 import { FaFacebook, FaGoogle, FaTwitter } from 'react-icons/fa';
+import axios from 'axios';
 
 const Login = () => {
     const { loginUserWithEmailAndPassword, signInWithGoogle } = useContext(AuthContext);
+    const location = useLocation();
     const navigate = useNavigate();
+    console.log(location);
 
     const handleSignIn = (evant) => {
         evant.preventDefault();
@@ -14,15 +17,31 @@ const Login = () => {
         const email = form.email.value;
         const password = form.password.value;
 
-        loginUserWithEmailAndPassword(email, password).then(() => {
-            navigate('/');
+        loginUserWithEmailAndPassword(email, password).then((result) => {
+            // navigate(location.state ? location.state : '/');
+            const loggedInUser = result.user;
+            console.log(loggedInUser);
+            const user = { email }
+
+            axios.post('http://localhost:5000/jwt', user, { withCredentials: true }).then(res => console.log(res.data)).catch(err => console.log(err))
+
         }).catch(err => console.log(err));
     };
 
     const handleGoogleSignIn = (media) => {
-        media().then(() => {
-            navigate('/')
-        }).catch(err=> console.log(err));
+        media().then((result) => {
+            // navigate(location.state ? location.state : '/')
+            const loggedInUser = result.user;
+            console.log(loggedInUser);
+            const user = { email: loggedInUser.email };
+
+            axios.post('http://localhost:5000/jwt', user, { withCredentials: true }).then(res => {
+                if (res.data.success) {
+                    navigate(location.state ? location.state : '/')
+                }
+            }).catch(err => console.log(err));
+
+        }).catch(err => console.log(err));
     }
 
     return (

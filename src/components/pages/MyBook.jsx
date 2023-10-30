@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import img from '../../assets/images/checkout/checkout.png';
 import { AuthContext } from '../AuthProvider';
+import axios from 'axios';
 
 const MyBook = () => {
     const { user } = useContext(AuthContext);
@@ -9,8 +10,9 @@ const MyBook = () => {
     const url = `http://localhost:5000/book?email=${user?.email}`;
 
     useEffect(() => {
-        fetch(url).then(res => res.json()).then(data => setBooked(data));
-    }, []);
+        axios.get(url, { withCredentials: true }).then(res => setBooked(res.data)).catch(err => console.log(err));
+        // fetch(url).then(res => res.json()).then(data => setBooked(data));
+    }, [url]);
 
     const handleBookedItemDelete = (_id) => {
         const prosed = confirm('Are You Sure');
@@ -89,7 +91,7 @@ const MyBook = () => {
                                 <td>${bk.price}</td>
                                 <td>{bk.email}</td>
                                 <th>
-                                   {status === 'confirm' ? <span>hhh</span> : <button className="btn" onClick={() => handleConfirmItem(bk._id)}>Confirm</button>}
+                                    {status === 'confirm' ? <span>hhh</span> : <button className="btn" onClick={() => handleConfirmItem(bk._id)}>Confirm</button>}
                                 </th>
                             </tr>)}
                         </tbody>
